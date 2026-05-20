@@ -312,6 +312,24 @@ export default function App() {
   const { theme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
   const closeMobile = useCallback(() => setMobileOpen(false), []);
+
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem("hermes_sidebar_collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("hermes_sidebar_collapsed", String(next));
+      } catch {}
+      return next;
+    });
+  }, []);
   const isDocsRoute = pathname === "/docs" || pathname === "/docs/";
   const normalizedPath = pathname.replace(/\/$/, "") || "/";
   const isChatRoute = normalizedPath === "/chat";
@@ -475,12 +493,14 @@ export default function App() {
             id="app-sidebar"
             aria-label={t.app.navigation}
             className={cn(
-              "fixed top-0 left-0 z-50 flex h-dvh max-h-dvh w-64 min-h-0 flex-col",
-              "border-r border-current/20",
+              "fixed top-0 left-0 z-50 flex h-dvh max-h-dvh min-h-0 flex-col",
               "bg-background-base/95 backdrop-blur-sm",
-              "transition-transform duration-200 ease-out",
+              "transition-all duration-200 ease-out",
               mobileOpen ? "translate-x-0" : "-translate-x-full",
-              "lg:sticky lg:top-0 lg:translate-x-0 lg:shrink-0",
+              "lg:sticky lg:top-0 lg:shrink-0",
+              sidebarCollapsed
+                ? "w-64 lg:w-0 lg:opacity-0 lg:pointer-events-none lg:-translate-x-full"
+                : "w-64 lg:w-64 lg:opacity-100 lg:translate-x-0 border-r border-current/20"
             )}
             style={{
               background: "var(--component-sidebar-background)",
@@ -582,7 +602,11 @@ export default function App() {
             <SidebarFooter />
           </aside>
 
-          <PageHeaderProvider pluginTabs={pluginTabMeta}>
+          <PageHeaderProvider
+            pluginTabs={pluginTabMeta}
+            sidebarCollapsed={sidebarCollapsed}
+            onToggleSidebar={toggleSidebar}
+          >
             <div
               className={cn(
                 "relative z-2 flex min-w-0 min-h-0 flex-1 flex-col",

@@ -1,5 +1,7 @@
 import { useLayoutEffect, useMemo, useState, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import { Menu, ChevronLeft } from "lucide-react";
+import { Button } from "@nous-research/ui/ui/components/button";
 import { PageHeaderContext } from "./page-header-context";
 import { resolvePageTitle } from "@/lib/resolve-page-title";
 import { cn } from "@/lib/utils";
@@ -8,9 +10,13 @@ import { useI18n } from "@/i18n";
 export function PageHeaderProvider({
   children,
   pluginTabs,
+  sidebarCollapsed,
+  onToggleSidebar,
 }: {
   children: ReactNode;
   pluginTabs: { path: string; label: string }[];
+  sidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
 }) {
   const { pathname } = useLocation();
   const { t } = useI18n();
@@ -68,6 +74,21 @@ export function PageHeaderProvider({
             )}
           >
             <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+              {onToggleSidebar && (
+                <Button
+                  ghost
+                  size="icon"
+                  onClick={onToggleSidebar}
+                  aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                  className="hidden lg:flex text-midground/70 hover:text-midground h-8 w-8 shrink-0 items-center justify-center p-0"
+                >
+                  {sidebarCollapsed ? (
+                    <Menu className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4" />
+                  )}
+                </Button>
+              )}
               <h1
                 className="font-expanded min-w-0 truncate text-sm font-bold tracking-[0.08em] text-midground"
                 style={{ mixBlendMode: "plus-lighter" }}
